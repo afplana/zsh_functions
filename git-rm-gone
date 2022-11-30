@@ -1,0 +1,26 @@
+# Functions
+function git-rm-gone {
+    # source: https://stackoverflow.com/a/33548037/1731824
+    git fetch -p
+    GONE_BRANCHES=$(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == "[gone]" {sub("refs/heads/", "", $1); print $1}')
+    if [ -z "$GONE_BRANCHES" ]
+    then
+        echo "No remote branches are gone"
+        return
+    fi
+    echo "The following commands will be run :"
+    for branch in $(echo $GONE_BRANCHES); do
+        echo "- git branch -D $branch;"
+    done
+    echo -n "Are you sure? (Y/N) "
+    read REPLY
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        for branch in $(echo $GONE_BRANCHES); do
+            git branch -D $branch;
+        done
+    else
+        echo "Cancelled"
+    fi
+}
+
